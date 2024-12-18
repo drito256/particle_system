@@ -13,7 +13,8 @@ int width = 1280;
 int height = 800;
 float fov = 45.f;
 
-void processInput(GLFWwindow *window, Camera& c);
+void processInput(GLFWwindow *window, Camera &c);
+
 void framebuffer_size_callback(GLFWwindow* window, int w, int h){
 	width = w;
 	height = h;
@@ -50,21 +51,52 @@ int main(int argc, char * argv[]) {
 		std::cout << "failed to init glad" << std::endl;
 		return -1;
 	}
+    
+
+    Camera camera(glm::vec3(1,1,1), -90.f, 0.f);
+    Shader shader("shaders/shader.vert", "shaders/shader.frag");
+
+    Texture texture("../res/empty.png"); 
+    ParticleSystem ps(texture, glm::vec3{1,1,1}, glm::vec4{100, 0, 100, 255}, glm::vec4{100, 0, 100, 255}, 2 );
+
+
 	glClearColor(0.1, 0.1, 0.1, 1);
 	glEnable(GL_DEPTH_TEST);
     
 	while(!glfwWindowShouldClose(window)){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        processInput(window, camera);
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
         
    
-
+        ps.update(glm::vec3(0, 0, 1));
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	glfwTerminate();
 
 	return 0;
+}
+
+void processInput(GLFWwindow *window, Camera& c)
+{
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        c.updatePosition(c.getFront());
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        c.updatePosition(-c.getFront());
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        c.updatePosition(-glm::normalize(glm::cross(c.getFront(), c.getUp())));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        c.updatePosition(glm::normalize(glm::cross(c.getFront(), c.getUp())));
+
+    if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+	    c.updateRotation(2.f, 0.f);
+    if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+	    c.updateRotation(-2.f ,0.f);
+    if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+	    c.updateRotation(0.f, 2.f);
+    if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+	    c.updateRotation(0.f ,-2.f);
+
 }
