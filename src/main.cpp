@@ -30,6 +30,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 		fov = 45.f;
 }
 
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
+//    std::cout << "Mouse position: (" << xpos << ", " << ypos << ")\n";
+}
+
+
 int main(int argc, char * argv[]) {
 	GLFWwindow* window;
 	glfwInit();
@@ -46,6 +51,7 @@ int main(int argc, char * argv[]) {
 	gladLoadGL();
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, cursorPositionCallback);
 
 	std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
@@ -56,30 +62,36 @@ int main(int argc, char * argv[]) {
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0.0, 0.5);
 
-    Camera camera(glm::vec3(1,1,1), -90.f, 0.f);
+    //Camera camera(glm::vec3(-35, -4, -14), -90.f, 0.f);
+    Camera camera(glm::vec3(0), -90.f, 0.f);
     Shader shader("shaders/shader.vert", "shaders/shader.frag");
-    std::cout << " kkk " << std::endl;
-    Texture texture("../res/empty.png"); 
-    ParticleSystem ps(texture, glm::vec3{1,1,1}, glm::vec3{0,1,1},
+
+    stbi_set_flip_vertically_on_load(true);
+    Texture texture("../res/spark2.png"); 
+    ParticleSystem ps(texture, glm::vec3{0,0,-100}, glm::vec3{0,1,1},
                       glm::vec4{100, 0, 100, 255}, glm::vec4{100, 0, 100, 255}, 100 );
 
 
 	glClearColor(0.1, 0.1, 0.1, 1);
 	glEnable(GL_DEPTH_TEST);
     
-    std::cout << " kkk " << std::endl;
 	while(!glfwWindowShouldClose(window)){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         processInput(window, camera);
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
-        
-        std::cout << " kkk " << std::endl;
         shader.use();   
         shader.setMat4("view", camera.getViewMatrix());
         shader.setMat4("projection", camera.getProjectionMatrix());
+        shader.setVec3("cameraUp", camera.getUp());
+        shader.setVec3("cameraRight", camera.getRight());
+
         ps.update(gen, dis);
-        std::cout << " kkk " << std::endl;
+
+        double mousex, mousey;
+        glfwGetCursorPos(window, &mousex, &mousey);
+        ps.update_position(glm::vec3(-50 + mousex/10, 50 -mousey/10,-100));
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

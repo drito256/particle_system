@@ -9,13 +9,12 @@ out vec4 FragColor;
 
 void main() {
     // Sample the particle's texture
-//    vec4 texColor = texture(particleTexture, texCoords);
+    vec4 texColor = texture(particleTexture, texCoords);
 
     // Multiply texture color with particle color
-    FragColor = /*texColor **/ particleColor;
+    FragColor = texColor * particleColor;
 
-    // Discard completely transparent fragments for better blending
-    if (FragColor.a < 0.1)
+    if (FragColor.a < 0.05)
         discard;
 }
 

@@ -10,6 +10,12 @@ Particle::Particle(int ttl_ms, glm::vec3 position, glm::vec3 velocity,glm::vec4 
 
 void Particle::update(){
     this->position += velocity;
+    applyGravity((1000 - this->ttl_ms)/1000.0 * 50);
+    this->ttl_ms--;
+}
+
+void Particle::applyGravity(double strength){
+    this->position.y -= strength;
 }
 
 int Particle::getTtl(){
