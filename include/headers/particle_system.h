@@ -5,21 +5,24 @@
 #include "../glad/glad.h"
 
 #include <chrono>
+#include <random>
 #include <vector>
 #include <iostream>
 
 
 class ParticleSystem{
     public:
-        ParticleSystem(Texture texture, glm::vec3 position, glm::vec4 starting_color,
-                        glm::vec4 ending_color, int particles_per_s);
+        ParticleSystem(Texture texture, glm::vec3 position, glm::vec3 velocity,
+                       glm::vec4 starting_color, glm::vec4 ending_color,
+                       int particles_per_s);
         void update_position(glm::vec3 vec); // update position on whole system
-        void update(glm::vec3 vec); // update each particle
+        void update(std::mt19937& gen, std::uniform_real_distribution<>& dis); // update each particle
 
     private:
         Texture texture;
         std::vector<Particle> particles;
         glm::vec3 pos;
+        glm::vec3 velocity;
         glm::vec3 starting_color;
         glm::vec3 ending_color;
         int particles_per_s;
@@ -30,7 +33,7 @@ class ParticleSystem{
         unsigned int vbo;
         unsigned int instance_vbo;
 
-        void generate_particle();
+        void generate_particle(std::mt19937& gen, std::uniform_real_distribution<>& dis);
         void setup_buffers();
         void render();
 };

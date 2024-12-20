@@ -8,6 +8,7 @@
 // Standard Headers
 #include <iostream>
 #include <cstdlib>
+#include <random>
 
 int width = 1280;
 int height = 800;
@@ -51,26 +52,34 @@ int main(int argc, char * argv[]) {
 		std::cout << "failed to init glad" << std::endl;
 		return -1;
 	}
-    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 0.5);
 
     Camera camera(glm::vec3(1,1,1), -90.f, 0.f);
     Shader shader("shaders/shader.vert", "shaders/shader.frag");
-
+    std::cout << " kkk " << std::endl;
     Texture texture("../res/empty.png"); 
-    ParticleSystem ps(texture, glm::vec3{1,1,1}, glm::vec4{100, 0, 100, 255}, glm::vec4{100, 0, 100, 255}, 2 );
+    ParticleSystem ps(texture, glm::vec3{1,1,1}, glm::vec3{0,1,1},
+                      glm::vec4{100, 0, 100, 255}, glm::vec4{100, 0, 100, 255}, 100 );
 
 
 	glClearColor(0.1, 0.1, 0.1, 1);
 	glEnable(GL_DEPTH_TEST);
     
+    std::cout << " kkk " << std::endl;
 	while(!glfwWindowShouldClose(window)){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         processInput(window, camera);
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
         
-   
-        ps.update(glm::vec3(0, 0, 1));
+        std::cout << " kkk " << std::endl;
+        shader.use();   
+        shader.setMat4("view", camera.getViewMatrix());
+        shader.setMat4("projection", camera.getProjectionMatrix());
+        ps.update(gen, dis);
+        std::cout << " kkk " << std::endl;
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
